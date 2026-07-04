@@ -7,7 +7,7 @@ import type { LovelaceViewConfig, LovelaceSectionConfig } from '../types/lovelac
 import { Registry } from '../Registry';
 import { localize } from '../utils/localize';
 
-class Simon42ViewClimateStrategy extends HTMLElement {
+class RequinardViewClimateStrategy extends HTMLElement {
   static async generate(config: any, hass: HomeAssistant): Promise<LovelaceViewConfig> {
     // Ensure Registry is initialized (idempotent — no-op if already done)
     Registry.initialize(hass, config.config || {});
@@ -16,65 +16,52 @@ class Simon42ViewClimateStrategy extends HTMLElement {
       (id) => hass.states[id] !== undefined
     );
 
-    // Group by hvac_action or state
-    const heating: string[] = [];
-    const cooling: string[] = [];
-    const idle: string[] = [];
-    const off: string[] = [];
+    const dashboardConfig = config.dashboardConfig || config.config || {};
+    const groupByFloors = dashboardConfig.group_climate_by_floors === true;
+    const groupByRooms = dashboardConfig.group_climate_by_rooms === true;
 
-    for (const id of climateIds) {
-      const state = hass.states[id];
-      const hvacAction = state.attributes?.hvac_action as string | undefined;
-      const hvacState = state.state;
-
-      if (hvacState === 'off' || hvacState === 'unavailable' || hvacState === 'unknown') {
-        off.push(id);
-      } else if (hvacAction === 'heating' || (!hvacAction && hvacState === 'heat')) {
-        heating.push(id);
-      } else if (hvacAction === 'cooling' || (!hvacAction && hvacState === 'cool')) {
-        cooling.push(id);
-      } else {
-        // idle, drying, fan, auto without action, etc.
-        idle.push(id);
-      }
-    }
-
-    const sections: LovelaceSectionConfig[] = [];
-
-    const buildSection = (
-      entities: string[],
-      heading: string,
-      icon: string
-    ): void => {
-      if (entities.length === 0) return;
-      sections.push({
+    const sections: LovelaceSectionConfig[] = [
+      {
         type: 'grid',
         cards: [
           {
-            type: 'heading',
-            heading: `${heading} (${entities.length})`,
-            heading_style: 'title',
-            icon,
+            type: 'custom:requinard-climate-group-card',
+            hvac_status: 'heating',
+            heading: localize('climate.heating'),
+            icon: 'mdi:fire',
+            group_by_floors: groupByFloors,
+            group_by_rooms: groupByRooms,
           },
-          ...entities.map((e) => ({
-            type: 'tile',
-            entity: e,
-            vertical: false,
-            features: [{ type: 'climate-hvac-modes' }],
-            features_position: 'inline',
-            state_content: ['hvac_action', 'current_temperature'],
-          })),
+          {
+            type: 'custom:requinard-climate-group-card',
+            hvac_status: 'cooling',
+            heading: localize('climate.cooling'),
+            icon: 'mdi:snowflake',
+            group_by_floors: groupByFloors,
+            group_by_rooms: groupByRooms,
+          },
+          {
+            type: 'custom:requinard-climate-group-card',
+            hvac_status: 'idle',
+            heading: localize('climate.idle'),
+            icon: 'mdi:thermostat',
+            group_by_floors: groupByFloors,
+            group_by_rooms: groupByRooms,
+          },
+          {
+            type: 'custom:requinard-climate-group-card',
+            hvac_status: 'off',
+            heading: localize('climate.off'),
+            icon: 'mdi:power-off',
+            group_by_floors: groupByFloors,
+            group_by_rooms: groupByRooms,
+          },
         ],
-      });
-    };
-
-    buildSection(heating, localize('climate.heating'), 'mdi:fire');
-    buildSection(cooling, localize('climate.cooling'), 'mdi:snowflake');
-    buildSection(idle, localize('climate.idle'), 'mdi:thermostat');
-    buildSection(off, localize('climate.off'), 'mdi:power-off');
+      },
+    ];
 
     return { type: 'sections', sections };
   }
 }
 
-customElements.define('ll-strategy-simon42-view-climate', Simon42ViewClimateStrategy);
+customElements.define('ll-strategy-requinard-view-climate', RequinardViewClimateStrategy);

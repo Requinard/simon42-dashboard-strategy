@@ -1,7 +1,7 @@
 // ====================================================================
 // Areas Section Builder
 // ====================================================================
-// Ported from dist/utils/simon42-section-builder.js (createAreasSection)
+// Ported from dist/utils/requinard-section-builder.js (createAreasSection)
 // with full TypeScript types.
 // Creates area cards grouped by floor or as a single flat section.
 // ====================================================================

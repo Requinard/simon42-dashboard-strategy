@@ -7,8 +7,9 @@ import type { HomeAssistant, HassEntity } from '../types/homeassistant';
 import type { AreaRegistryEntry } from '../types/registries';
 import { Registry } from '../Registry';
 import { trackHassUpdate } from '../utils/debug';
-import { localize } from '../utils/localize';
+import { groupByFloors, groupByRooms } from '../utils/grouping-utils';
 import { stripAreaName } from '../utils/name-utils';
+import { localize } from '../utils/localize';
 
 declare global {
   interface Window {
@@ -22,6 +23,7 @@ interface LightsGroupConfig {
   entities?: string[];
   group_type: 'on' | 'off' | 'all';
   group_by_floors?: boolean;
+  group_by_rooms?: boolean;
   nested_groups?: boolean;
   heading_label?: string;
   heading_icon?: string;
@@ -33,6 +35,13 @@ interface FloorGroup {
   floorId: string | null;
   floorName: string;
   floorIcon: string;
+  lights: string[];
+}
+
+interface RoomGroup {
+  roomId: string | null;
+  roomName: string;
+  roomIcon: string;
   lights: string[];
 }
 
@@ -48,7 +57,7 @@ interface LovelaceCardElement extends HTMLElement {
 
 const LIGHT_BRIGHTNESS_MODES = ['brightness', 'color_temp', 'hs', 'xy', 'rgb', 'rgbw', 'rgbww', 'white'];
 
-class Simon42LightsGroupCard extends LitElement {
+class RequinardLightsGroupCard extends LitElement {
   static properties = {
     hass: { attribute: false },
   };
@@ -84,7 +93,8 @@ class Simon42LightsGroupCard extends LitElement {
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       gap: 8px;
     }
-    .floor-section {
+    .floor-section,
+    .room-section {
       display: flex;
       flex-direction: column;
       gap: 8px;
@@ -316,41 +326,26 @@ class Simon42LightsGroupCard extends LitElement {
 
   private _groupByFloors(lights: string[]): FloorGroup[] {
     if (!this.hass) return [];
+    return groupByFloors(this.hass, lights, (id) => id).map((g) => ({
+      floorId: g.floorId,
+      floorName: g.floorName,
+      floorIcon: g.floorIcon,
+      lights: g.items,
+    }));
+  }
 
-    const areas: AreaRegistryEntry[] = Object.values(this.hass.areas);
-    const areaFloorMap = new Map<string, string | null>();
-    for (const area of areas) {
-      areaFloorMap.set(area.area_id, area.floor_id ?? null);
-    }
+  private _groupByRooms(lights: string[]): RoomGroup[] {
+    if (!this.hass) return [];
+    return groupByRooms(this.hass, lights, (id) => id).map((g) => ({
+      roomId: g.roomId,
+      roomName: g.roomName,
+      roomIcon: g.roomIcon,
+      lights: g.items,
+    }));
+  }
 
-    // Partition lights by floor
-    const floorMap = new Map<string | null, string[]>();
-    for (const id of lights) {
-      const areaId = this._getAreaForEntity(id);
-      const floorId = areaId ? (areaFloorMap.get(areaId) ?? null) : null;
-      if (!floorMap.has(floorId)) floorMap.set(floorId, []);
-      floorMap.get(floorId)?.push(id);
-    }
-
-    // Use HA's floor order from the registry. The hass.floors object preserves
-    // the user-defined order from HA's "Reorder areas and floors" dialog via
-    // Object.keys() insertion order — no separate sort_order field needed.
-    const floors = this.hass.floors;
-    const floorOrder = Object.keys(floors);
-    const sortedKeys = [
-      ...floorOrder.filter((id) => floorMap.has(id)),
-      ...(floorMap.has(null) ? [null] : []),
-    ];
-
-    return sortedKeys.map((floorId) => {
-      const floor = floorId ? floors[floorId] : null;
-      return {
-        floorId,
-        floorName: floor?.name || localize('lights.floor_other'),
-        floorIcon: floor?.icon || 'mdi:home-outline',
-        lights: floorMap.get(floorId) ?? [],
-      };
-    });
+  private _getRoomDomKey(roomId: string | null): string {
+    return roomId ?? '_none';
   }
 
   private _getFloorDomKey(floorId: string | null): string {
@@ -538,6 +533,24 @@ class Simon42LightsGroupCard extends LitElement {
     }
     this.hidden = false;
 
+    if (this._config.group_by_rooms) {
+      const roomGroups = this._groupByRooms(lights);
+      return html`
+        <div class="lights-section">
+          <div id="heading"></div>
+          ${roomGroups.map((group) => {
+            const roomKey = this._getRoomDomKey(group.roomId);
+            return html`
+              <div class="room-section">
+                <div id=${`room-heading-${roomKey}`}></div>
+                <div class="light-grid" id=${`room-grid-${roomKey}`}></div>
+              </div>
+            `;
+          })}
+        </div>
+      `;
+    }
+
     if (this._config.group_by_floors) {
       const floorGroups = this._groupByFloors(lights);
       return html`
@@ -566,10 +579,20 @@ class Simon42LightsGroupCard extends LitElement {
     `;
   }
 
+  private _getOrCreateRoomHeadingCard(key: string): LovelaceCardElement {
+    let card = this._floorHeadingCards.get(`room-${key}`);
+    if (card) return card;
+    card = document.createElement('hui-heading-card') as LovelaceCardElement;
+    card.hass = this.hass;
+    this._floorHeadingCards.set(`room-${key}`, card);
+    return card;
+  }
+
   private _getOrCreateFloorHeadingCard(key: string): LovelaceCardElement {
     let card = this._floorHeadingCards.get(key);
     if (card) return card;
     card = document.createElement('hui-heading-card') as LovelaceCardElement;
+    card.hass = this.hass;
     this._floorHeadingCards.set(key, card);
     return card;
   }
@@ -584,6 +607,45 @@ class Simon42LightsGroupCard extends LitElement {
     this._lastLightsList = lightsKey;
 
     if (lights.length === 0) return;
+
+    if (this._config.group_by_rooms) {
+      const roomGroups = this._groupByRooms(lights);
+
+      // Reconcile main heading (total count)
+      const headingSlot = this.shadowRoot?.getElementById('heading');
+      if (headingSlot) {
+        if (!this._headingCard) {
+          this._headingCard = document.createElement('hui-heading-card') as LovelaceCardElement;
+        }
+        const mainHeadingCard = this._headingCard;
+        headingSlot.appendChild(mainHeadingCard);
+        mainHeadingCard.hass = this.hass;
+        mainHeadingCard.setConfig(this._buildHeadingConfig(lights));
+      }
+
+      // Reconcile per-room sections
+      const allActiveIds = new Set(lights);
+      for (const group of roomGroups) {
+        const key = this._getRoomDomKey(group.roomId);
+        const roomHeadingSlot = this.shadowRoot?.getElementById(`room-heading-${key}`);
+        if (roomHeadingSlot) {
+          const headingCard = this._getOrCreateRoomHeadingCard(key);
+          if (!headingCard.parentNode) roomHeadingSlot.appendChild(headingCard);
+          headingCard.hass = this.hass;
+          headingCard.setConfig(this._buildHeadingConfig(group.lights, group.roomName, group.roomIcon));
+        }
+
+        const grid = this.shadowRoot?.getElementById(`room-grid-${key}`);
+        if (grid) {
+          const hierarchy = this._buildHierarchy(group.lights);
+          this._reconcileHierarchy(grid, hierarchy.topLevelIds, hierarchy.nodes);
+        }
+      }
+
+      // Clean up stale pool entries
+      this._cleanupPools(allActiveIds);
+      return;
+    }
 
     if (this._config.group_by_floors) {
       const floorGroups = this._groupByFloors(lights);
@@ -620,18 +682,7 @@ class Simon42LightsGroupCard extends LitElement {
       }
 
       // Clean up stale pool entries
-      for (const [id, card] of this._tileCards) {
-        if (!allActiveIds.has(id)) {
-          if (card.parentNode) card.parentNode.removeChild(card);
-          this._tileCards.delete(id);
-        }
-      }
-      for (const [id, container] of this._groupContainers) {
-        if (!allActiveIds.has(id)) {
-          if (container.parentNode) container.parentNode.removeChild(container);
-          this._groupContainers.delete(id);
-        }
-      }
+      this._cleanupPools(allActiveIds);
       return;
     }
 
@@ -653,22 +704,24 @@ class Simon42LightsGroupCard extends LitElement {
     const hierarchy = this._buildHierarchy(lights);
 
     // Clean up stale pool entries
-    const activeIds = new Set(lights);
+    this._cleanupPools(new Set(lights));
+
+    this._reconcileHierarchy(grid, hierarchy.topLevelIds, hierarchy.nodes);
+  }
+
+  private _cleanupPools(allActiveIds: Set<string>): void {
     for (const [id, card] of this._tileCards) {
-      if (!activeIds.has(id)) {
+      if (!allActiveIds.has(id)) {
         if (card.parentNode) card.parentNode.removeChild(card);
         this._tileCards.delete(id);
       }
     }
-
     for (const [id, container] of this._groupContainers) {
-      if (!activeIds.has(id)) {
+      if (!allActiveIds.has(id)) {
         if (container.parentNode) container.parentNode.removeChild(container);
         this._groupContainers.delete(id);
       }
     }
-
-    this._reconcileHierarchy(grid, hierarchy.topLevelIds, hierarchy.nodes);
   }
 
   getCardSize(): number {
@@ -677,4 +730,4 @@ class Simon42LightsGroupCard extends LitElement {
   }
 }
 
-customElements.define('simon42-lights-group-card', Simon42LightsGroupCard);
+customElements.define('requinard-lights-group-card', RequinardLightsGroupCard);

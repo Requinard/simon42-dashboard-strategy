@@ -5,10 +5,13 @@
 import type { LovelaceViewConfig } from '../types/lovelace';
 import { localize } from '../utils/localize';
 
-class Simon42ViewCoversStrategy extends HTMLElement {
+class RequinardViewCoversStrategy extends HTMLElement {
   static async generate(config: any, _hass: any): Promise<LovelaceViewConfig> {
     const strategyConfig = config.config || {};
+    const dashboardConfig = config.dashboardConfig || config.config || {};
     const showPartiallyOpen = strategyConfig.show_partially_open_covers === true;
+    const groupByFloors = dashboardConfig.group_covers_by_floors === true;
+    const groupByRooms = dashboardConfig.group_covers_by_rooms === true;
 
     // Separate awnings and windows from other covers — they have different semantics
     const allDeviceClasses = config.device_classes || ['awning', 'blind', 'curtain', 'shade', 'shutter', 'window'];
@@ -16,12 +19,17 @@ class Simon42ViewCoversStrategy extends HTMLElement {
     const hasAwnings = allDeviceClasses.includes('awning');
     const hasWindows = allDeviceClasses.includes('window');
 
-    const baseConfig = { entities: config.entities, config: config.config };
+    const baseConfig = {
+      entities: config.entities,
+      config: config.config,
+      group_by_floors: groupByFloors,
+      group_by_rooms: groupByRooms,
+    };
 
     // Rollos & Vorhänge
     const cards: any[] = [
       {
-        type: 'custom:simon42-covers-group-card',
+        type: 'custom:requinard-covers-group-card',
         ...baseConfig,
         device_classes: coverClasses,
         group_type: 'open',
@@ -31,7 +39,7 @@ class Simon42ViewCoversStrategy extends HTMLElement {
 
     if (showPartiallyOpen) {
       cards.push({
-        type: 'custom:simon42-covers-group-card',
+        type: 'custom:requinard-covers-group-card',
         ...baseConfig,
         device_classes: coverClasses,
         group_type: 'partially_open',
@@ -40,7 +48,7 @@ class Simon42ViewCoversStrategy extends HTMLElement {
     }
 
     cards.push({
-      type: 'custom:simon42-covers-group-card',
+      type: 'custom:requinard-covers-group-card',
       ...baseConfig,
       device_classes: coverClasses,
       group_type: 'closed',
@@ -60,7 +68,7 @@ class Simon42ViewCoversStrategy extends HTMLElement {
       };
 
       cards.push({
-        type: 'custom:simon42-covers-group-card',
+        type: 'custom:requinard-covers-group-card',
         ...awningConfig,
         group_type: 'open',
         show_partially_open: showPartiallyOpen,
@@ -68,7 +76,7 @@ class Simon42ViewCoversStrategy extends HTMLElement {
 
       if (showPartiallyOpen) {
         cards.push({
-          type: 'custom:simon42-covers-group-card',
+          type: 'custom:requinard-covers-group-card',
           ...awningConfig,
           group_type: 'partially_open',
           show_partially_open: true,
@@ -76,7 +84,7 @@ class Simon42ViewCoversStrategy extends HTMLElement {
       }
 
       cards.push({
-        type: 'custom:simon42-covers-group-card',
+        type: 'custom:requinard-covers-group-card',
         ...awningConfig,
         group_type: 'closed',
         show_partially_open: showPartiallyOpen,
@@ -96,7 +104,7 @@ class Simon42ViewCoversStrategy extends HTMLElement {
       };
 
       cards.push({
-        type: 'custom:simon42-covers-group-card',
+        type: 'custom:requinard-covers-group-card',
         ...windowConfig,
         group_type: 'open',
         show_partially_open: showPartiallyOpen,
@@ -104,7 +112,7 @@ class Simon42ViewCoversStrategy extends HTMLElement {
 
       if (showPartiallyOpen) {
         cards.push({
-          type: 'custom:simon42-covers-group-card',
+          type: 'custom:requinard-covers-group-card',
           ...windowConfig,
           group_type: 'partially_open',
           show_partially_open: true,
@@ -112,7 +120,7 @@ class Simon42ViewCoversStrategy extends HTMLElement {
       }
 
       cards.push({
-        type: 'custom:simon42-covers-group-card',
+        type: 'custom:requinard-covers-group-card',
         ...windowConfig,
         group_type: 'closed',
         show_partially_open: showPartiallyOpen,
@@ -126,4 +134,4 @@ class Simon42ViewCoversStrategy extends HTMLElement {
   }
 }
 
-customElements.define('ll-strategy-simon42-view-covers', Simon42ViewCoversStrategy);
+customElements.define('ll-strategy-requinard-view-covers', RequinardViewCoversStrategy);

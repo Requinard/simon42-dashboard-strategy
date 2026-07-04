@@ -1,4 +1,4 @@
-# Simon42 Dashboard Strategy
+# Requinard Dashboard Strategy
 
 Custom Lovelace Dashboard Strategy for Home Assistant. Generates dynamic dashboards from area/device/entity metadata with flexible user configuration. This project is actively used by Simons loved YouTube viewers — clean, stable code is top priority.
 
@@ -12,7 +12,7 @@ Custom Lovelace Dashboard Strategy for Home Assistant. Generates dynamic dashboa
 
 ```
 src/
-├── simon42-dashboard-strategy.ts    # Entry point: generate(config, hass) → {title, views[]}
+├── requinard-dashboard-strategy.ts    # Entry point: generate(config, hass) → {title, views[]}
 ├── Registry.ts                      # Singleton registry (synchronous init from hass object, pre-computed Maps)
 ├── types/                           # Type definitions
 │   ├── homeassistant.ts             #   HA interfaces (hass object, callWS, formatters)
@@ -185,7 +185,7 @@ The following locations must be updated for a new version:
 | File | Field | Example |
 |------|-------|---------|
 | `package.json` | `"version"` | `"1.3.0"` |
-| `src/simon42-dashboard-strategy.ts` | `STRATEGY_VERSION` | `'1.3.0-beta.5'` |
+| `src/requinard-dashboard-strategy.ts` | `STRATEGY_VERSION` | `'1.3.0-beta.5'` |
 | `package-lock.json` | updated automatically via `npm install` | — |
 | **Git tag** | create on release | `v1.3.0-beta.5` or `v1.3.0` |
 

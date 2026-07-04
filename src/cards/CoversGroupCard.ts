@@ -4,8 +4,10 @@
 
 import { LitElement, html, css, nothing, type PropertyValues } from 'lit';
 import type { HomeAssistant } from '../types/homeassistant';
+import type { AreaRegistryEntry } from '../types/registries';
 import { Registry } from '../Registry';
 import { trackHassUpdate } from '../utils/debug';
+import { groupByFloors, groupByRooms } from '../utils/grouping-utils';
 import { localize } from '../utils/localize';
 
 declare global {
@@ -17,6 +19,8 @@ declare global {
 interface CoversGroupConfig {
   config?: any;
   group_type: 'open' | 'closed' | 'partially_open';
+  group_by_floors?: boolean;
+  group_by_rooms?: boolean;
   show_partially_open?: boolean;
   device_classes?: string[];
   heading_open?: string;
@@ -24,6 +28,20 @@ interface CoversGroupConfig {
   heading_partial?: string;
   batch_open_text?: string;
   batch_close_text?: string;
+}
+
+interface FloorGroup {
+  floorId: string | null;
+  floorName: string;
+  floorIcon: string;
+  covers: string[];
+}
+
+interface RoomGroup {
+  roomId: string | null;
+  roomName: string;
+  roomIcon: string;
+  covers: string[];
 }
 
 // Pre-compiled RegExps for cover type name stripping
@@ -50,7 +68,7 @@ const COVER_TERM_REGEXPS = COVER_TERMS.map((term) => new RegExp(`^${term}\\s+|\\
 
 const DEFAULT_DEVICE_CLASSES = ['awning', 'blind', 'curtain', 'shade', 'shutter', 'window'];
 
-class Simon42CoversGroupCard extends LitElement {
+class RequinardCoversGroupCard extends LitElement {
   static properties = {
     hass: { attribute: false },
   };
@@ -59,11 +77,13 @@ class Simon42CoversGroupCard extends LitElement {
   private _config!: CoversGroupConfig;
   private _deviceClasses!: string[];
   private _cachedFilteredIds: Set<string> | null = null;
+  private _cachedAreaForEntity: Map<string, string | null> | null = null;
   private _lastCoversList = '';
 
   // Reusable card pool
   private _tileCards: Map<string, any> = new Map();
   private _headingCard: any = null;
+  private _floorHeadingCards: Map<string, any> = new Map();
 
   static styles = css`
     :host {
@@ -83,6 +103,12 @@ class Simon42CoversGroupCard extends LitElement {
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       gap: 8px;
     }
+    .floor-section,
+    .room-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
   `;
 
   setConfig(config: CoversGroupConfig): void {
@@ -98,6 +124,7 @@ class Simon42CoversGroupCard extends LitElement {
 
     if (!oldHass || oldHass.entities !== this.hass.entities) {
       this._cachedFilteredIds = null;
+      this._cachedAreaForEntity = null;
     }
 
     // Build cache if needed
@@ -195,6 +222,43 @@ class Simon42CoversGroupCard extends LitElement {
     return name.trim() || state.attributes.friendly_name || entityId;
   }
 
+  private _getAreaForEntity(entityId: string): string | null {
+    if (!this._cachedAreaForEntity) {
+      this._cachedAreaForEntity = new Map();
+    }
+    if (this._cachedAreaForEntity.has(entityId)) {
+      return this._cachedAreaForEntity.get(entityId) ?? null;
+    }
+    const entity = Registry.getEntity(entityId);
+    let areaId: string | null = entity?.area_id ?? null;
+    if (!areaId && entity?.device_id) {
+      const device = Registry.getDevice(entity.device_id);
+      areaId = device?.area_id ?? null;
+    }
+    this._cachedAreaForEntity.set(entityId, areaId);
+    return areaId;
+  }
+
+  private _groupByFloors(covers: string[]): FloorGroup[] {
+    if (!this.hass) return [];
+    return groupByFloors(this.hass, covers, (id) => id).map((g) => ({
+      floorId: g.floorId,
+      floorName: g.floorName,
+      floorIcon: g.floorIcon,
+      covers: g.items,
+    }));
+  }
+
+  private _groupByRooms(covers: string[]): RoomGroup[] {
+    if (!this.hass) return [];
+    return groupByRooms(this.hass, covers, (id) => id).map((g) => ({
+      roomId: g.roomId,
+      roomName: g.roomName,
+      roomIcon: g.roomIcon,
+      covers: g.items,
+    }));
+  }
+
   private _buildHeadingConfig(covers: string[]): any {
     const groupType = this._config.group_type;
     const openText = this._config.batch_open_text || localize('covers.open_all');
@@ -273,6 +337,32 @@ class Simon42CoversGroupCard extends LitElement {
     return card;
   }
 
+  private _getOrCreateRoomHeadingCard(key: string): any {
+    let card = this._floorHeadingCards.get(`room-${key}`);
+    if (card) return card;
+    card = document.createElement('hui-heading-card');
+    card.hass = this.hass;
+    this._floorHeadingCards.set(`room-${key}`, card);
+    return card;
+  }
+
+  private _getOrCreateFloorHeadingCard(key: string): any {
+    let card = this._floorHeadingCards.get(key);
+    if (card) return card;
+    card = document.createElement('hui-heading-card');
+    card.hass = this.hass;
+    this._floorHeadingCards.set(key, card);
+    return card;
+  }
+
+  private _getRoomDomKey(roomId: string | null): string {
+    return roomId ?? '_none';
+  }
+
+  private _getFloorDomKey(floorId: string | null): string {
+    return floorId ?? '_none';
+  }
+
   private _calculateRenderKey(covers: string[]): string {
     return covers
       .map((id) => {
@@ -291,7 +381,47 @@ class Simon42CoversGroupCard extends LitElement {
     if (!this.hass || !this._cachedFilteredIds) return nothing;
 
     const covers = this._getRelevantCovers();
-    this.hidden = covers.length === 0;
+    if (covers.length === 0) {
+      this.hidden = true;
+      return nothing;
+    }
+    this.hidden = false;
+
+    if (this._config.group_by_rooms) {
+      const roomGroups = this._groupByRooms(covers);
+      return html`
+        <div class="covers-section">
+          <div id="heading"></div>
+          ${roomGroups.map((group) => {
+            const roomKey = this._getRoomDomKey(group.roomId);
+            return html`
+              <div class="room-section">
+                <div id=${`room-heading-${roomKey}`}></div>
+                <div class="cover-grid" id=${`room-grid-${roomKey}`}></div>
+              </div>
+            `;
+          })}
+        </div>
+      `;
+    }
+
+    if (this._config.group_by_floors) {
+      const floorGroups = this._groupByFloors(covers);
+      return html`
+        <div class="covers-section">
+          <div id="heading"></div>
+          ${floorGroups.map((group) => {
+            const floorKey = this._getFloorDomKey(group.floorId);
+            return html`
+              <div class="floor-section">
+                <div id=${`floor-heading-${floorKey}`}></div>
+                <div class="cover-grid" id=${`floor-grid-${floorKey}`}></div>
+              </div>
+            `;
+          })}
+        </div>
+      `;
+    }
 
     return html`
       <div class="covers-section">
@@ -310,18 +440,55 @@ class Simon42CoversGroupCard extends LitElement {
     if (this._lastCoversList === coversKey) return;
     this._lastCoversList = coversKey;
 
-    if (covers.length === 0) {
-      const headingSlot = this.shadowRoot?.getElementById('heading');
-      if (headingSlot) headingSlot.innerHTML = '';
-      const grid = this.shadowRoot?.getElementById('grid');
-      if (grid) grid.innerHTML = '';
-      this._headingCard = null;
-      this._tileCards.clear();
-      this._lastCoversList = '';
+    if (this._config.group_by_rooms) {
+      const roomGroups = this._groupByRooms(covers);
+      const allActiveIds = new Set(covers);
+
+      for (const group of roomGroups) {
+        const key = this._getRoomDomKey(group.roomId);
+        const roomHeadingSlot = this.shadowRoot?.getElementById(`room-heading-${key}`);
+        if (roomHeadingSlot) {
+          const headingCard = this._getOrCreateRoomHeadingCard(key);
+          if (!headingCard.parentNode) roomHeadingSlot.appendChild(headingCard);
+          headingCard.hass = this.hass;
+          headingCard.setConfig(this._buildHeadingConfig(group.covers));
+        }
+
+        const grid = this.shadowRoot?.getElementById(`room-grid-${key}`);
+        if (grid) {
+          this._reconcileGrid(grid, group.covers);
+        }
+      }
+
+      this._cleanupPools(allActiveIds);
       return;
     }
 
-    // Reconcile heading card
+    if (this._config.group_by_floors) {
+      const floorGroups = this._groupByFloors(covers);
+      const allActiveIds = new Set(covers);
+
+      for (const group of floorGroups) {
+        const key = this._getFloorDomKey(group.floorId);
+        const floorHeadingSlot = this.shadowRoot?.getElementById(`floor-heading-${key}`);
+        if (floorHeadingSlot) {
+          const headingCard = this._getOrCreateFloorHeadingCard(key);
+          if (!headingCard.parentNode) floorHeadingSlot.appendChild(headingCard);
+          headingCard.hass = this.hass;
+          headingCard.setConfig(this._buildHeadingConfig(group.covers));
+        }
+
+        const grid = this.shadowRoot?.getElementById(`floor-grid-${key}`);
+        if (grid) {
+          this._reconcileGrid(grid, group.covers);
+        }
+      }
+
+      this._cleanupPools(allActiveIds);
+      return;
+    }
+
+    // Flat mode (no floor grouping)
     const headingSlot = this.shadowRoot?.getElementById('heading');
     if (headingSlot) {
       if (!this._headingCard) {
@@ -332,20 +499,14 @@ class Simon42CoversGroupCard extends LitElement {
       this._headingCard.setConfig(this._buildHeadingConfig(covers));
     }
 
-    // Reconcile tile cards in grid
     const grid = this.shadowRoot?.getElementById('grid');
-    if (!grid) return;
-
-    const activeIds = new Set(covers);
-
-    // Remove cards for entities no longer in the list
-    for (const [id, card] of this._tileCards) {
-      if (!activeIds.has(id)) {
-        if (card.parentNode === grid) grid.removeChild(card);
-        this._tileCards.delete(id);
-      }
+    if (grid) {
+      this._reconcileGrid(grid, covers);
     }
+    this._cleanupPools(new Set(covers));
+  }
 
+  private _reconcileGrid(grid: HTMLElement, covers: string[]): void {
     // Add/reorder cards to match the desired order
     let prevNode: Node | null = null;
     for (const entityId of covers) {
@@ -363,10 +524,19 @@ class Simon42CoversGroupCard extends LitElement {
     }
   }
 
+  private _cleanupPools(allActiveIds: Set<string>): void {
+    for (const [id, card] of this._tileCards) {
+      if (!allActiveIds.has(id)) {
+        if (card.parentNode) card.parentNode.removeChild(card);
+        this._tileCards.delete(id);
+      }
+    }
+  }
+
   getCardSize(): number {
     const covers = this._getRelevantCovers();
     return Math.ceil(covers.length / 3) + 1;
   }
 }
 
-customElements.define('simon42-covers-group-card', Simon42CoversGroupCard);
+customElements.define('requinard-covers-group-card', RequinardCoversGroupCard);

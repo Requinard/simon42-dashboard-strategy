@@ -1,21 +1,21 @@
 // ====================================================================
 // Overview Section Builder
 // ====================================================================
-// Ported from dist/utils/simon42-section-builder.js (createOverviewSection)
+// Ported from dist/utils/requinard-section-builder.js (createOverviewSection)
 // with full TypeScript types.
 // Creates the "Übersicht" section with clock, alarm, search, summaries,
 // and favorites.
 // ====================================================================
 
 import type { HomeAssistant } from '../types/homeassistant';
-import type { Simon42StrategyConfig, CustomCard } from '../types/strategy';
+import type { RequinardStrategyConfig, CustomCard } from '../types/strategy';
 import type { LovelaceCardConfig, LovelaceSectionConfig } from '../types/lovelace';
 import { localize } from '../utils/localize';
 
 export interface OverviewSectionParams {
   someSensorId: string | null;
   showSearchCard: boolean;
-  config: Simon42StrategyConfig;
+  config: RequinardStrategyConfig;
   hass: HomeAssistant;
 }
 
@@ -101,7 +101,7 @@ export function createOverviewSection(data: OverviewSectionParams): LovelaceSect
 
   if (showLightSummary) {
     summaryCards.push({
-      type: 'custom:simon42-summary-card',
+      type: 'custom:requinard-summary-card',
       summary_type: 'lights',
       areas_options: config.areas_options || {},
     });
@@ -109,7 +109,7 @@ export function createOverviewSection(data: OverviewSectionParams): LovelaceSect
 
   if (showCoversSummary) {
     summaryCards.push({
-      type: 'custom:simon42-summary-card',
+      type: 'custom:requinard-summary-card',
       summary_type: 'covers',
       areas_options: config.areas_options || {},
     });
@@ -117,7 +117,7 @@ export function createOverviewSection(data: OverviewSectionParams): LovelaceSect
 
   if (showSecuritySummary) {
     summaryCards.push({
-      type: 'custom:simon42-summary-card',
+      type: 'custom:requinard-summary-card',
       summary_type: 'security',
       areas_options: config.areas_options || {},
     });
@@ -125,7 +125,7 @@ export function createOverviewSection(data: OverviewSectionParams): LovelaceSect
 
   if (showBatterySummary) {
     summaryCards.push({
-      type: 'custom:simon42-summary-card',
+      type: 'custom:requinard-summary-card',
       summary_type: 'batteries',
       areas_options: config.areas_options || {},
       hide_mobile_app_batteries: config.hide_mobile_app_batteries,
@@ -135,7 +135,7 @@ export function createOverviewSection(data: OverviewSectionParams): LovelaceSect
 
   if (showClimateSummary) {
     summaryCards.push({
-      type: 'custom:simon42-summary-card',
+      type: 'custom:requinard-summary-card',
       summary_type: 'climate',
       areas_options: config.areas_options || {},
     });

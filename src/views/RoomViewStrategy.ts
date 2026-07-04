@@ -34,7 +34,7 @@ function mediaPlayerSupportsPlayback(state: HassEntity): boolean {
   return (f & (MEDIA_PAUSE | MEDIA_PLAY | MEDIA_STOP)) !== 0;
 }
 
-class Simon42ViewRoomStrategy extends HTMLElement {
+class RequinardViewRoomStrategy extends HTMLElement {
   static async generate(config: any, hass: HomeAssistant): Promise<LovelaceViewConfig> {
     const area: AreaRegistryEntry = config.area;
     debugLog(`room-generate-${area.area_id}: called at ${performance.now().toFixed(1)}ms after page load`);
@@ -450,7 +450,7 @@ class Simon42ViewRoomStrategy extends HTMLElement {
         type: 'grid',
         cards: [
           {
-            type: 'custom:simon42-lights-group-card',
+            type: 'custom:requinard-lights-group-card',
             entities: roomEntities.lights,
             group_type: 'all',
             heading_label: localize('room.lighting'),
@@ -641,4 +641,4 @@ class Simon42ViewRoomStrategy extends HTMLElement {
   }
 }
 
-customElements.define('ll-strategy-simon42-view-room', Simon42ViewRoomStrategy);
+customElements.define('ll-strategy-requinard-view-room', RequinardViewRoomStrategy);

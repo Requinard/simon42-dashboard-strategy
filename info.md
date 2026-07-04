@@ -1,4 +1,4 @@
-# Simon42 Dashboard Strategy
+# Requinard Dashboard Strategy
 
 Eine modulare und hochkonfigurierbare Dashboard-Strategy für Home Assistant, die automatisch Views basierend auf Bereichen, Entitäten und deren Zuständen generiert.
 
@@ -19,14 +19,14 @@ Nach der Installation über HACS:
    lovelace:
      mode: storage
      resources:
-       - url: /local/simon42-strategy/simon42-strategies-loader.js
+       - url: /hacsfiles/requinard-dashboard-strategy/requinard-dashboard-strategy.js
          type: module
    ```
 
 2. Erstelle ein neues Dashboard mit der Strategy:
    ```yaml
    strategy:
-     type: custom:simon42-dashboard
+     type: custom:requinard-dashboard
    ```
 
 Für detaillierte Anweisungen siehe das README.

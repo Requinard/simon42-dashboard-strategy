@@ -1,5 +1,5 @@
 // ====================================================================
-// SIMON42 DASHBOARD STRATEGY - EDITOR (LitElement)
+// REQUINARD DASHBOARD STRATEGY - EDITOR (LitElement)
 // ====================================================================
 // Single-file LitElement editor replacing the previous 4-file
 // vanilla HTMLElement + innerHTML pattern.
@@ -11,7 +11,7 @@ import yaml from 'js-yaml';
 
 import type { HomeAssistant } from '../types/homeassistant';
 import type {
-  Simon42StrategyConfig,
+  RequinardStrategyConfig,
   CustomView,
   CustomCard,
   CustomBadge,
@@ -54,7 +54,7 @@ declare global {
 // Editor Class
 // ====================================================================
 
-class Simon42DashboardStrategyEditor extends LitElement {
+class RequinardDashboardStrategyEditor extends LitElement {
   static properties = {
     _config: { state: true },
     _expandedAreas: { state: true },
@@ -65,7 +65,7 @@ class Simon42DashboardStrategyEditor extends LitElement {
   private _hass: HomeAssistant | null = null;
   private _isUpdatingConfig = false;
 
-  _config: Simon42StrategyConfig = {};
+  _config: RequinardStrategyConfig = {};
   _expandedAreas = new Set<string>();
   _expandedGroups = new Map<string, Set<string>>();
 
@@ -98,7 +98,7 @@ class Simon42DashboardStrategyEditor extends LitElement {
     if (!oldHass) this.requestUpdate();
   }
 
-  setConfig(config: Simon42StrategyConfig): void {
+  setConfig(config: RequinardStrategyConfig): void {
     if (this._isUpdatingConfig) return;
     this._config = config;
   }
@@ -1043,7 +1043,7 @@ class Simon42DashboardStrategyEditor extends LitElement {
   }
 
   private _updateSectionsOrder(newOrder: SectionKey[]): void {
-    const newConfig: Simon42StrategyConfig = {
+    const newConfig: RequinardStrategyConfig = {
       ...this._config,
       sections_order: newOrder,
     };
@@ -1097,7 +1097,7 @@ class Simon42DashboardStrategyEditor extends LitElement {
         </div>
         <div class="section-order-list" id="section-order-list">
           ${order.map((key) => {
-            const meta = Simon42DashboardStrategyEditor._sectionMeta.get(key);
+            const meta = RequinardDashboardStrategyEditor._sectionMeta.get(key);
             if (!meta) return nothing;
             const disabled = this._isSectionDisabled(key);
             const toggleable = this._isSectionToggleable(key);
@@ -1746,7 +1746,7 @@ class Simon42DashboardStrategyEditor extends LitElement {
               @change=${(e: Event) => this._updateCustomCardField(index, 'target_section', (e.target as HTMLSelectElement).value)}>
               ${(['custom_cards', 'overview', 'areas', 'weather', 'energy'] as const).map((key) => html`
                 <option value=${key} ?selected=${(card.target_section || 'custom_cards') === key}>
-                  ${localize(Simon42DashboardStrategyEditor._sectionMeta.get(key)!.labelKey)}
+                  ${localize(RequinardDashboardStrategyEditor._sectionMeta.get(key)!.labelKey)}
                 </option>
               `)}
             </select>
@@ -2143,7 +2143,7 @@ class Simon42DashboardStrategyEditor extends LitElement {
   private _toggleChanged(key: string, value: boolean, defaultValue: boolean): void {
     if (!this._hass) return;
 
-    const newConfig: Simon42StrategyConfig = {
+    const newConfig: RequinardStrategyConfig = {
       ...this._config,
       [key]: value,
     };
@@ -2160,7 +2160,7 @@ class Simon42DashboardStrategyEditor extends LitElement {
   private _summariesColumnsChanged(columns: 2 | 4): void {
     if (!this._hass) return;
 
-    const newConfig: Simon42StrategyConfig = {
+    const newConfig: RequinardStrategyConfig = {
       ...this._config,
       summaries_columns: columns,
     };
@@ -2177,7 +2177,7 @@ class Simon42DashboardStrategyEditor extends LitElement {
     if (!this._hass) return;
 
     const entityId = (e.target as HTMLSelectElement).value;
-    const newConfig: Simon42StrategyConfig = {
+    const newConfig: RequinardStrategyConfig = {
       ...this._config,
       alarm_entity: entityId,
     };
@@ -2193,7 +2193,7 @@ class Simon42DashboardStrategyEditor extends LitElement {
   private _batteryCriticalChanged(e: Event): void {
     const value = parseInt((e.target as HTMLInputElement).value, 10);
     if (isNaN(value) || value < 1 || value > 99) return;
-    const newConfig: Simon42StrategyConfig = { ...this._config, battery_critical_threshold: value };
+    const newConfig: RequinardStrategyConfig = { ...this._config, battery_critical_threshold: value };
     if (value === 20) delete newConfig.battery_critical_threshold;
     this._config = newConfig;
     this._fireConfigChanged(newConfig);
@@ -2202,7 +2202,7 @@ class Simon42DashboardStrategyEditor extends LitElement {
   private _batteryLowChanged(e: Event): void {
     const value = parseInt((e.target as HTMLInputElement).value, 10);
     if (isNaN(value) || value < 1 || value > 99) return;
-    const newConfig: Simon42StrategyConfig = { ...this._config, battery_low_threshold: value };
+    const newConfig: RequinardStrategyConfig = { ...this._config, battery_low_threshold: value };
     if (value === 50) delete newConfig.battery_low_threshold;
     this._config = newConfig;
     this._fireConfigChanged(newConfig);
@@ -2222,7 +2222,7 @@ class Simon42DashboardStrategyEditor extends LitElement {
     const currentFavorites = this._config.favorite_entities || [];
     if (currentFavorites.includes(entityId)) return;
 
-    const newConfig: Simon42StrategyConfig = {
+    const newConfig: RequinardStrategyConfig = {
       ...this._config,
       favorite_entities: [...currentFavorites, entityId],
     };
@@ -2236,7 +2236,7 @@ class Simon42DashboardStrategyEditor extends LitElement {
     const currentFavorites = this._config.favorite_entities || [];
     const newFavorites = currentFavorites.filter((id) => id !== entityId);
 
-    const newConfig: Simon42StrategyConfig = {
+    const newConfig: RequinardStrategyConfig = {
       ...this._config,
       favorite_entities: newFavorites.length > 0 ? newFavorites : undefined,
     };
@@ -2263,7 +2263,7 @@ class Simon42DashboardStrategyEditor extends LitElement {
     const currentPins = this._config.room_pin_entities || [];
     if (currentPins.includes(entityId)) return;
 
-    const newConfig: Simon42StrategyConfig = {
+    const newConfig: RequinardStrategyConfig = {
       ...this._config,
       room_pin_entities: [...currentPins, entityId],
     };
@@ -2277,7 +2277,7 @@ class Simon42DashboardStrategyEditor extends LitElement {
     const currentPins = this._config.room_pin_entities || [];
     const newPins = currentPins.filter((id) => id !== entityId);
 
-    const newConfig: Simon42StrategyConfig = {
+    const newConfig: RequinardStrategyConfig = {
       ...this._config,
       room_pin_entities: newPins.length > 0 ? newPins : undefined,
     };
@@ -2302,7 +2302,7 @@ class Simon42DashboardStrategyEditor extends LitElement {
       parsed_config: undefined,
     } as CustomView);
 
-    const newConfig: Simon42StrategyConfig = { ...this._config, custom_views: customViews };
+    const newConfig: RequinardStrategyConfig = { ...this._config, custom_views: customViews };
     this._config = newConfig;
     this._fireConfigChanged(newConfig);
   }
@@ -2311,7 +2311,7 @@ class Simon42DashboardStrategyEditor extends LitElement {
     const customViews: CustomView[] = [...(this._config.custom_views || [])];
     customViews.splice(index, 1);
 
-    const newConfig: Simon42StrategyConfig = { ...this._config };
+    const newConfig: RequinardStrategyConfig = { ...this._config };
     if (customViews.length === 0) {
       delete newConfig.custom_views;
     } else {
@@ -2328,7 +2328,7 @@ class Simon42DashboardStrategyEditor extends LitElement {
 
     customViews[index] = { ...customViews[index], [field]: value };
 
-    const newConfig: Simon42StrategyConfig = { ...this._config, custom_views: customViews };
+    const newConfig: RequinardStrategyConfig = { ...this._config, custom_views: customViews };
     this._config = newConfig;
     this._fireConfigChanged(newConfig);
   }
@@ -2360,7 +2360,7 @@ class Simon42DashboardStrategyEditor extends LitElement {
 
     customViews[index] = updated;
 
-    const newConfig: Simon42StrategyConfig = { ...this._config, custom_views: customViews };
+    const newConfig: RequinardStrategyConfig = { ...this._config, custom_views: customViews };
     this._config = newConfig;
     this._fireConfigChanged(newConfig);
   }
@@ -2369,7 +2369,7 @@ class Simon42DashboardStrategyEditor extends LitElement {
 
   private _customCardsHeadingChanged(e: Event): void {
     const value = (e.target as HTMLInputElement).value.trim();
-    const newConfig: Simon42StrategyConfig = { ...this._config };
+    const newConfig: RequinardStrategyConfig = { ...this._config };
     if (value) {
       newConfig.custom_cards_heading = value;
     } else {
@@ -2381,7 +2381,7 @@ class Simon42DashboardStrategyEditor extends LitElement {
 
   private _customCardsIconChanged(e: Event): void {
     const value = (e.target as HTMLInputElement).value.trim();
-    const newConfig: Simon42StrategyConfig = { ...this._config };
+    const newConfig: RequinardStrategyConfig = { ...this._config };
     if (value) {
       newConfig.custom_cards_icon = value;
     } else {
@@ -2395,7 +2395,7 @@ class Simon42DashboardStrategyEditor extends LitElement {
     const customCards: CustomCard[] = [...(this._config.custom_cards || [])];
     customCards.push({ title: '', yaml: '', parsed_config: undefined } as CustomCard);
 
-    const newConfig: Simon42StrategyConfig = { ...this._config, custom_cards: customCards };
+    const newConfig: RequinardStrategyConfig = { ...this._config, custom_cards: customCards };
     this._config = newConfig;
     this._fireConfigChanged(newConfig);
   }
@@ -2404,7 +2404,7 @@ class Simon42DashboardStrategyEditor extends LitElement {
     const customCards: CustomCard[] = [...(this._config.custom_cards || [])];
     customCards.splice(index, 1);
 
-    const newConfig: Simon42StrategyConfig = { ...this._config };
+    const newConfig: RequinardStrategyConfig = { ...this._config };
     if (customCards.length === 0) {
       delete newConfig.custom_cards;
     } else {
@@ -2421,7 +2421,7 @@ class Simon42DashboardStrategyEditor extends LitElement {
 
     customCards[index] = { ...customCards[index], [field]: value };
 
-    const newConfig: Simon42StrategyConfig = { ...this._config, custom_cards: customCards };
+    const newConfig: RequinardStrategyConfig = { ...this._config, custom_cards: customCards };
     this._config = newConfig;
     this._fireConfigChanged(newConfig);
   }
@@ -2453,7 +2453,7 @@ class Simon42DashboardStrategyEditor extends LitElement {
 
     customCards[index] = updated;
 
-    const newConfig: Simon42StrategyConfig = { ...this._config, custom_cards: customCards };
+    const newConfig: RequinardStrategyConfig = { ...this._config, custom_cards: customCards };
     this._config = newConfig;
     this._fireConfigChanged(newConfig);
   }
@@ -2464,7 +2464,7 @@ class Simon42DashboardStrategyEditor extends LitElement {
     const customBadges: CustomBadge[] = [...(this._config.custom_badges || [])];
     customBadges.push({ yaml: '', parsed_config: undefined } as CustomBadge);
 
-    const newConfig: Simon42StrategyConfig = { ...this._config, custom_badges: customBadges };
+    const newConfig: RequinardStrategyConfig = { ...this._config, custom_badges: customBadges };
     this._config = newConfig;
     this._fireConfigChanged(newConfig);
   }
@@ -2473,7 +2473,7 @@ class Simon42DashboardStrategyEditor extends LitElement {
     const customBadges: CustomBadge[] = [...(this._config.custom_badges || [])];
     customBadges.splice(index, 1);
 
-    const newConfig: Simon42StrategyConfig = { ...this._config };
+    const newConfig: RequinardStrategyConfig = { ...this._config };
     if (customBadges.length === 0) {
       delete newConfig.custom_badges;
     } else {
@@ -2511,7 +2511,7 @@ class Simon42DashboardStrategyEditor extends LitElement {
 
     customBadges[index] = updated;
 
-    const newConfig: Simon42StrategyConfig = { ...this._config, custom_badges: customBadges };
+    const newConfig: RequinardStrategyConfig = { ...this._config, custom_badges: customBadges };
     this._config = newConfig;
     this._fireConfigChanged(newConfig);
   }
@@ -2537,7 +2537,7 @@ class Simon42DashboardStrategyEditor extends LitElement {
       this._areaEntitiesCache.delete(areaId);
     }
 
-    const newConfig: Simon42StrategyConfig = {
+    const newConfig: RequinardStrategyConfig = {
       ...this._config,
       areas_display: {
         ...this._config.areas_display,
@@ -2685,7 +2685,7 @@ class Simon42DashboardStrategyEditor extends LitElement {
       delete newAreasOptions[areaId];
     }
 
-    const newConfig: Simon42StrategyConfig = {
+    const newConfig: RequinardStrategyConfig = {
       ...this._config,
       areas_options: newAreasOptions,
     };
@@ -2752,7 +2752,7 @@ class Simon42DashboardStrategyEditor extends LitElement {
       delete newAreasOptions[areaId];
     }
 
-    const newConfig: Simon42StrategyConfig = {
+    const newConfig: RequinardStrategyConfig = {
       ...this._config,
       areas_options: newAreasOptions,
     };
@@ -2808,7 +2808,7 @@ class Simon42DashboardStrategyEditor extends LitElement {
     const newAreasOptions: Record<string, any> = { ...this._config.areas_options, [areaId]: newAreaOptions };
     if (Object.keys(newAreasOptions[areaId]).length === 0) delete newAreasOptions[areaId];
 
-    const newConfig: Simon42StrategyConfig = { ...this._config, areas_options: newAreasOptions };
+    const newConfig: RequinardStrategyConfig = { ...this._config, areas_options: newAreasOptions };
     if (newConfig.areas_options && Object.keys(newConfig.areas_options).length === 0) delete newConfig.areas_options;
 
     this._config = newConfig;
@@ -2919,7 +2919,7 @@ class Simon42DashboardStrategyEditor extends LitElement {
 
   private _updateAreaOrder(newOrder: string[]): void {
 
-    const newConfig: Simon42StrategyConfig = {
+    const newConfig: RequinardStrategyConfig = {
       ...this._config,
       areas_display: {
         ...this._config.areas_display,
@@ -2991,7 +2991,7 @@ class Simon42DashboardStrategyEditor extends LitElement {
     currentList.splice(dropIndex, 0, draggedId);
 
     const key = listType === 'favorites' ? 'favorite_entities' : 'room_pin_entities';
-    const newConfig: Simon42StrategyConfig = { ...this._config, [key]: currentList };
+    const newConfig: RequinardStrategyConfig = { ...this._config, [key]: currentList };
     this._config = newConfig;
     this._fireConfigChanged(newConfig);
   };
@@ -3000,11 +3000,11 @@ class Simon42DashboardStrategyEditor extends LitElement {
   // CONFIG DISPATCH
   // ====================================================================
 
-  private _fireConfigChanged(config: Simon42StrategyConfig): void {
+  private _fireConfigChanged(config: RequinardStrategyConfig): void {
     this._isUpdatingConfig = true;
 
     // Strip internal fields before saving
-    const cleanConfig: Simon42StrategyConfig = { ...config };
+    const cleanConfig: RequinardStrategyConfig = { ...config };
     if (cleanConfig.custom_views) {
       cleanConfig.custom_views = cleanConfig.custom_views.map((cv) => {
         const clean = { ...cv };
@@ -3169,7 +3169,7 @@ function getAreaBadgeCandidates(areaId: string, hass: HomeAssistant): string[] {
   return candidates;
 }
 
-function getAdditionalBadgesForArea(areaId: string, config: Simon42StrategyConfig): string[] {
+function getAdditionalBadgesForArea(areaId: string, config: RequinardStrategyConfig): string[] {
   return config.areas_options?.[areaId]?.groups_options?.badges?.additional || [];
 }
 
@@ -3224,7 +3224,7 @@ function getDefaultShowNameEntities(badgeCandidates: string[], hass: HomeAssista
 
 function getBadgeNamesConfig(
   areaId: string,
-  config: Simon42StrategyConfig
+  config: RequinardStrategyConfig
 ): { namesVisible: string[]; namesHidden: string[] } {
   const opts = config.areas_options?.[areaId]?.groups_options?.badges;
   return {
@@ -3233,7 +3233,7 @@ function getBadgeNamesConfig(
   };
 }
 
-function getHiddenEntitiesForArea(areaId: string, config: Simon42StrategyConfig): Record<string, string[]> {
+function getHiddenEntitiesForArea(areaId: string, config: RequinardStrategyConfig): Record<string, string[]> {
   const areaOptions = config.areas_options?.[areaId];
   if (!areaOptions || !areaOptions.groups_options) {
     return {};
@@ -3249,7 +3249,7 @@ function getHiddenEntitiesForArea(areaId: string, config: Simon42StrategyConfig)
   return hidden;
 }
 
-function getEntityOrdersForArea(areaId: string, config: Simon42StrategyConfig): Record<string, string[]> {
+function getEntityOrdersForArea(areaId: string, config: RequinardStrategyConfig): Record<string, string[]> {
   const areaOptions = config.areas_options?.[areaId];
   if (!areaOptions || !areaOptions.groups_options) {
     return {};
@@ -3266,4 +3266,4 @@ function getEntityOrdersForArea(areaId: string, config: Simon42StrategyConfig): 
 }
 
 // Register custom element
-customElements.define('simon42-dashboard-strategy-editor', Simon42DashboardStrategyEditor);
+customElements.define('requinard-dashboard-strategy-editor', RequinardDashboardStrategyEditor);

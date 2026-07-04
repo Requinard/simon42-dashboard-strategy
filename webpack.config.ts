@@ -5,14 +5,14 @@ import CompressionPlugin from 'compression-webpack-plugin';
 
 const config: webpack.Configuration = {
   mode: 'production',
-  entry: './src/simon42-dashboard-strategy.ts',
+  entry: './src/requinard-dashboard-strategy.ts',
   output: {
     clean: true,
-    filename: 'simon42-dashboard-strategy.js',
-    chunkFilename: 'simon42-dashboard-strategy-[name].[contenthash:8].js',
+    filename: 'requinard-dashboard-strategy.js',
+    chunkFilename: 'requinard-dashboard-strategy-[name].[contenthash:8].js',
     path: path.resolve(import.meta.dirname, 'dist'),
     // publicPath must match the HA resource URL path for async chunk loading
-    publicPath: '/hacsfiles/simon42-dashboard-strategy/',
+    publicPath: '/hacsfiles/requinard-dashboard-strategy/',
   },
   resolve: {
     extensions: ['.ts', '.js'],

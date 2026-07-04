@@ -1,4 +1,4 @@
-# simon42 Dashboard Strategy
+# requinard Dashboard Strategy
 
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
 [![GitHub Release](https://img.shields.io/github/v/release/TheRealSimon42/simon42-dashboard-strategy?style=for-the-badge&color=green)](https://github.com/TheRealSimon42/simon42-dashboard-strategy/releases)
@@ -30,7 +30,7 @@ Eine modulare und hochkonfigurierbare Dashboard-Strategy für Home Assistant, di
 
 ## Unterstütze dieses Projekt
 
-Wenn dir die simon42 Dashboard Strategy hilft, unterstütze die Weiterentwicklung:
+Wenn dir die requinard Dashboard Strategy hilft, unterstütze die Weiterentwicklung:
 
 <p align="center">
   <a href="https://youtube.com/@simon42/join">
@@ -150,7 +150,7 @@ Mehr zur Filterung findest du im Abschnitt [Entity-Filterung](#entity-filterung)
 
 ```yaml
 strategy:
-  type: custom:simon42-dashboard
+  type: custom:requinard-dashboard
 
 ```
 

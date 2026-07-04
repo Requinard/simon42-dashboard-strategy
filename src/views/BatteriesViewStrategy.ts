@@ -39,15 +39,15 @@ function createBatterySection(
   };
 }
 
-class Simon42ViewBatteriesStrategy extends HTMLElement {
+class RequinardViewBatteriesStrategy extends HTMLElement {
   static async generate(config: any, hass: HomeAssistant): Promise<LovelaceViewConfig> {
     // Ensure Registry is initialized (idempotent — no-op if already done)
     Registry.initialize(hass, config.config || {});
 
     const batteryEntities = getBatteryEntities(hass, config.config);
 
-    // Group by status
     const strategyConfig = config.config || {};
+    const dashboardConfig = config.dashboardConfig || config.config || {};
     const criticalThreshold = strategyConfig.battery_critical_threshold ?? 20;
     const lowThreshold = strategyConfig.battery_low_threshold ?? 50;
     const critical: string[] = [];
@@ -73,31 +73,46 @@ class Simon42ViewBatteriesStrategy extends HTMLElement {
       else good.push(entityId);
     }
 
-    // Sort each group by battery level (lowest first)
-    const sortByLevel = (a: string, b: string): number => {
-      const valA = parseFloat(hass.states[a]?.state);
-      const valB = parseFloat(hass.states[b]?.state);
-      if (isNaN(valA)) return -1;
-      if (isNaN(valB)) return 1;
-      return valA - valB;
-    };
-    critical.sort(sortByLevel);
-    low.sort(sortByLevel);
-    good.sort(sortByLevel);
+    const groupByFloors = dashboardConfig.group_batteries_by_floors === true;
+    const groupByRooms = dashboardConfig.group_batteries_by_rooms === true;
 
-    const sections: LovelaceSectionConfig[] = [];
-
-    const criticalSection = createBatterySection(critical, 'critical', `< ${criticalThreshold}%`);
-    if (criticalSection) sections.push(criticalSection);
-
-    const lowSection = createBatterySection(low, 'low', `${criticalThreshold}% - ${lowThreshold}%`);
-    if (lowSection) sections.push(lowSection);
-
-    const goodSection = createBatterySection(good, 'good', `> ${lowThreshold}%`);
-    if (goodSection) sections.push(goodSection);
+    const sections: LovelaceSectionConfig[] = [
+      {
+        type: 'grid',
+        cards: [
+          {
+            type: 'custom:requinard-batteries-group-card',
+            status: 'critical',
+            range_text: `< ${criticalThreshold}%`,
+            color: 'red',
+            config: strategyConfig,
+            group_by_floors: groupByFloors,
+            group_by_rooms: groupByRooms,
+          },
+          {
+            type: 'custom:requinard-batteries-group-card',
+            status: 'low',
+            range_text: `${criticalThreshold}% - ${lowThreshold}%`,
+            color: 'yellow',
+            config: strategyConfig,
+            group_by_floors: groupByFloors,
+            group_by_rooms: groupByRooms,
+          },
+          {
+            type: 'custom:requinard-batteries-group-card',
+            status: 'good',
+            range_text: `> ${lowThreshold}%`,
+            color: 'green',
+            config: strategyConfig,
+            group_by_floors: groupByFloors,
+            group_by_rooms: groupByRooms,
+          },
+        ],
+      },
+    ];
 
     return { type: 'sections', sections };
   }
 }
 
-customElements.define('ll-strategy-simon42-view-batteries', Simon42ViewBatteriesStrategy);
+customElements.define('ll-strategy-requinard-view-batteries', RequinardViewBatteriesStrategy);

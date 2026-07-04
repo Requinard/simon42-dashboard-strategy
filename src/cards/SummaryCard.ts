@@ -43,7 +43,7 @@ const COLOR_MAP: Record<string, string> = {
   grey: 'var(--disabled-color, #bdbdbd)',
 };
 
-class Simon42SummaryCard extends LitElement {
+class RequinardSummaryCard extends LitElement {
   static properties = {
     hass: { attribute: false },
     _count: { state: true },
@@ -335,11 +335,11 @@ class Simon42SummaryCard extends LitElement {
   }
 }
 
-customElements.define('simon42-summary-card', Simon42SummaryCard);
+customElements.define('requinard-summary-card', RequinardSummaryCard);
 
 window.customCards = window.customCards || [];
 window.customCards.push({
-  type: 'simon42-summary-card',
-  name: 'Simon42 Summary Card',
+  type: 'requinard-summary-card',
+  name: 'Requinard Summary Card',
   description: 'Reactive summary card that counts entities dynamically',
 });

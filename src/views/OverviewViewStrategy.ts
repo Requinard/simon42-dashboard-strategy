@@ -7,7 +7,7 @@
 // ====================================================================
 
 import type { HomeAssistant } from '../types/homeassistant';
-import type { Simon42StrategyConfig, SectionKey, CustomCard } from '../types/strategy';
+import type { RequinardStrategyConfig, SectionKey, CustomCard } from '../types/strategy';
 import { DEFAULT_SECTIONS_ORDER } from '../types/strategy';
 import type { LovelaceViewConfig, LovelaceSectionConfig, LovelaceBadgeConfig, LovelaceCardConfig } from '../types/lovelace';
 import { Registry } from '../Registry';
@@ -60,10 +60,10 @@ function renderCustomCards(cards: CustomCard[]): LovelaceCardConfig[] {
   return result;
 }
 
-class Simon42ViewOverviewStrategy extends HTMLElement {
+class RequinardViewOverviewStrategy extends HTMLElement {
   static async generate(config: any, hass: HomeAssistant): Promise<LovelaceViewConfig> {
     timeStart('overview-generate');
-    const dashboardConfig: Simon42StrategyConfig = config.dashboardConfig || {};
+    const dashboardConfig: RequinardStrategyConfig = config.dashboardConfig || {};
 
     // Initialize Registry (idempotent — skips if already done by another view)
     Registry.initialize(hass, dashboardConfig);
@@ -153,4 +153,4 @@ class Simon42ViewOverviewStrategy extends HTMLElement {
   }
 }
 
-customElements.define('ll-strategy-simon42-view-overview', Simon42ViewOverviewStrategy);
+customElements.define('ll-strategy-requinard-view-overview', RequinardViewOverviewStrategy);

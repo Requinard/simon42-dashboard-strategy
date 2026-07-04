@@ -1,7 +1,7 @@
 // ====================================================================
-// Simon42 Dashboard Strategy Types
+// Requinard Dashboard Strategy Types
 // ====================================================================
-// All configuration and data types specific to the simon42 strategy.
+// All configuration and data types specific to the requinard strategy.
 // These types cover the YAML config schema and internal data structures
 // used throughout the strategy codebase.
 // ====================================================================
@@ -20,7 +20,7 @@ export const DEFAULT_SECTIONS_ORDER: SectionKey[] = [
 
 // -- Main Strategy Config ---------------------------------------------
 
-export interface Simon42StrategyConfig {
+export interface RequinardStrategyConfig {
   // Global toggles
   show_weather?: boolean; // default: true
   show_energy?: boolean; // default: true

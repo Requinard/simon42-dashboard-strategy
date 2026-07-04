@@ -7,13 +7,13 @@
 
 import { Registry } from '../Registry';
 import type { HomeAssistant } from '../types/homeassistant';
-import type { Simon42StrategyConfig, PersonData } from '../types/strategy';
+import type { RequinardStrategyConfig, PersonData } from '../types/strategy';
 
 /**
  * Collects person entities with home/away state.
  * Uses pre-filtered Registry method — no manual exclusion checks needed.
  */
-export function collectPersons(hass: HomeAssistant, _config: Simon42StrategyConfig): PersonData[] {
+export function collectPersons(hass: HomeAssistant, _config: RequinardStrategyConfig): PersonData[] {
   const personIds = Registry.getVisibleEntityIdsForDomain('person');
 
   return personIds
@@ -68,7 +68,7 @@ export function findDummySensor(hass: HomeAssistant): string {
  */
 export const SECURITY_EXCLUDED_PLATFORMS = new Set(['tankerkoenig']);
 
-export function getBatteryEntities(hass: HomeAssistant, config: Simon42StrategyConfig): string[] {
+export function getBatteryEntities(hass: HomeAssistant, config: RequinardStrategyConfig): string[] {
   const sensorIds = Registry.getEntityIdsForDomain('sensor');
   const binarySensorIds = Registry.getEntityIdsForDomain('binary_sensor');
 

@@ -1,5 +1,5 @@
 // ====================================================================
-// SIMON42 DASHBOARD STRATEGY - Registry (Singleton)
+// REQUINARD DASHBOARD STRATEGY - Registry (Singleton)
 // ====================================================================
 // Central data access layer. Replaces scattered entity filtering across
 // multiple JS files with pre-computed Maps and Sets for O(1) lookups.
@@ -17,7 +17,7 @@ import type {
   AreaRegistryEntry,
   FloorRegistryEntry,
 } from './types/registries';
-import type { Simon42StrategyConfig } from './types/strategy';
+import type { RequinardStrategyConfig } from './types/strategy';
 import { timeStart, timeEnd, debugLog } from './utils/debug';
 import { setupLocalize } from './utils/localize';
 
@@ -36,7 +36,7 @@ class Registry {
   // === Raw data references ===
 
   private static _hass: HomeAssistant;
-  private static _config: Simon42StrategyConfig;
+  private static _config: RequinardStrategyConfig;
 
   // === Registry arrays (from hass object) ===
 
@@ -97,7 +97,7 @@ class Registry {
    * Synchronous — reads directly from hass.entities/devices/areas.
    * Idempotent: skips if already initialized.
    */
-  static initialize(hass: HomeAssistant, config: Simon42StrategyConfig): void {
+  static initialize(hass: HomeAssistant, config: RequinardStrategyConfig): void {
     if (Registry._initialized) return;
 
     timeStart('registry-init');
@@ -313,7 +313,7 @@ class Registry {
   }
 
   /** The strategy configuration. */
-  static get config(): Simon42StrategyConfig {
+  static get config(): RequinardStrategyConfig {
     return Registry._config;
   }
 
