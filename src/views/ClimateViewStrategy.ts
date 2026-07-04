@@ -7,7 +7,7 @@ import type { LovelaceViewConfig, LovelaceSectionConfig } from '../types/lovelac
 import { Registry } from '../Registry';
 import { localize } from '../utils/localize';
 
-class RequinardViewClimateStrategy extends HTMLElement {
+export class ClimateViewStrategy extends HTMLElement {
   static async generate(config: any, hass: HomeAssistant): Promise<LovelaceViewConfig> {
     // Ensure Registry is initialized (idempotent — no-op if already done)
     Registry.initialize(hass, config.config || {});
@@ -64,4 +64,4 @@ class RequinardViewClimateStrategy extends HTMLElement {
   }
 }
 
-customElements.define('ll-strategy-requinard-view-climate', RequinardViewClimateStrategy);
+customElements.define('ll-strategy-requinard-view-climate', ClimateViewStrategy);

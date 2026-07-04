@@ -17,7 +17,7 @@ interface ClimateGroupConfig {
   group_by_rooms?: boolean;
 }
 
-class RequinardClimateGroupCard extends LitElement {
+export class ClimateGroupCard extends LitElement {
   static properties = {
     hass: { attribute: false },
   };
@@ -328,4 +328,4 @@ class RequinardClimateGroupCard extends LitElement {
   }
 }
 
-customElements.define('requinard-climate-group-card', RequinardClimateGroupCard);
+customElements.define('requinard-climate-group-card', ClimateGroupCard);

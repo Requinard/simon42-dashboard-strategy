@@ -43,7 +43,7 @@ const COLOR_MAP: Record<string, string> = {
   grey: 'var(--disabled-color, #bdbdbd)',
 };
 
-class RequinardSummaryCard extends LitElement {
+export class SummaryCard extends LitElement {
   static properties = {
     hass: { attribute: false },
     _count: { state: true },
@@ -335,7 +335,7 @@ class RequinardSummaryCard extends LitElement {
   }
 }
 
-customElements.define('requinard-summary-card', RequinardSummaryCard);
+customElements.define('requinard-summary-card', SummaryCard);
 
 window.customCards = window.customCards || [];
 window.customCards.push({

@@ -8,7 +8,7 @@ import { Registry } from '../Registry';
 import { localize } from '../utils/localize';
 import { SECURITY_EXCLUDED_PLATFORMS } from '../utils/entity-filter';
 
-class RequinardViewSecurityStrategy extends HTMLElement {
+export class SecurityViewStrategy extends HTMLElement {
   static async generate(config: any, hass: HomeAssistant): Promise<LovelaceViewConfig> {
     // Ensure Registry is initialized (idempotent — no-op if already done)
     Registry.initialize(hass, config.config || {});
@@ -125,4 +125,4 @@ class RequinardViewSecurityStrategy extends HTMLElement {
   }
 }
 
-customElements.define('ll-strategy-requinard-view-security', RequinardViewSecurityStrategy);
+customElements.define('ll-strategy-requinard-view-security', SecurityViewStrategy);

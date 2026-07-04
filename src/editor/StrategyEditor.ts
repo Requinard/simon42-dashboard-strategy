@@ -54,7 +54,7 @@ declare global {
 // Editor Class
 // ====================================================================
 
-class RequinardDashboardStrategyEditor extends LitElement {
+export class RequinardDashboardStrategyEditor extends LitElement {
   static properties = {
     _config: { state: true },
     _expandedAreas: { state: true },

@@ -68,7 +68,7 @@ const COVER_TERM_REGEXPS = COVER_TERMS.map((term) => new RegExp(`^${term}\\s+|\\
 
 const DEFAULT_DEVICE_CLASSES = ['awning', 'blind', 'curtain', 'shade', 'shutter', 'window'];
 
-class RequinardCoversGroupCard extends LitElement {
+export class CoversGroupCard extends LitElement {
   static properties = {
     hass: { attribute: false },
   };
@@ -539,4 +539,4 @@ class RequinardCoversGroupCard extends LitElement {
   }
 }
 
-customElements.define('requinard-covers-group-card', RequinardCoversGroupCard);
+customElements.define('requinard-covers-group-card', CoversGroupCard);

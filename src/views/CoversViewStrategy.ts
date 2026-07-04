@@ -5,7 +5,7 @@
 import type { LovelaceViewConfig } from '../types/lovelace';
 import { localize } from '../utils/localize';
 
-class RequinardViewCoversStrategy extends HTMLElement {
+export class CoversViewStrategy extends HTMLElement {
   static async generate(config: any, _hass: any): Promise<LovelaceViewConfig> {
     const strategyConfig = config.config || {};
     const dashboardConfig = config.dashboardConfig || config.config || {};
@@ -134,4 +134,4 @@ class RequinardViewCoversStrategy extends HTMLElement {
   }
 }
 
-customElements.define('ll-strategy-requinard-view-covers', RequinardViewCoversStrategy);
+customElements.define('ll-strategy-requinard-view-covers', CoversViewStrategy);

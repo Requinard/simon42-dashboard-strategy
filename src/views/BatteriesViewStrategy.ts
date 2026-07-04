@@ -39,7 +39,7 @@ function createBatterySection(
   };
 }
 
-class RequinardViewBatteriesStrategy extends HTMLElement {
+export class BatteriesViewStrategy extends HTMLElement {
   static async generate(config: any, hass: HomeAssistant): Promise<LovelaceViewConfig> {
     // Ensure Registry is initialized (idempotent — no-op if already done)
     Registry.initialize(hass, config.config || {});
@@ -115,4 +115,4 @@ class RequinardViewBatteriesStrategy extends HTMLElement {
   }
 }
 
-customElements.define('ll-strategy-requinard-view-batteries', RequinardViewBatteriesStrategy);
+customElements.define('ll-strategy-requinard-view-batteries', BatteriesViewStrategy);

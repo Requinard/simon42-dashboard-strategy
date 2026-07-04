@@ -10,7 +10,7 @@ import type { HomeAssistant } from './types/homeassistant';
 import type { RequinardStrategyConfig } from './types/strategy';
 import type { LovelaceConfig, LovelaceViewConfig } from './types/lovelace';
 
-const STRATEGY_VERSION = '1.3.4-beta.9';
+const STRATEGY_VERSION = '1.4.0';
 
 const DEBUG = new URLSearchParams(window.location.search).has('req_debug');
 const T0 = performance.now();
@@ -19,36 +19,49 @@ const t = (label: string) => {
 };
 let generateCallCount = 0;
 
-// Start loading all chunks IMMEDIATELY
-const modulesPromise = Promise.all([
-  import('./cards/SummaryCard'),
-  import('./cards/LightsGroupCard'),
-  import('./cards/CoversGroupCard'),
-  import('./cards/BatteriesGroupCard'),
-  import('./cards/ClimateGroupCard'),
-  import('./cards/SecurityGroupCard'),
-  import('./views/OverviewViewStrategy'),
-  import('./views/LightsViewStrategy'),
-  import('./views/CoversViewStrategy'),
-  import('./views/SecurityViewStrategy'),
-  import('./views/BatteriesViewStrategy'),
-  import('./views/ClimateViewStrategy'),
-  import('./views/RoomViewStrategy'),
-]);
+import { SummaryCard } from './cards/SummaryCard';
+import { LightsGroupCard } from './cards/LightsGroupCard';
+import { CoversGroupCard } from './cards/CoversGroupCard';
+import { BatteriesGroupCard } from './cards/BatteriesGroupCard';
+import { ClimateGroupCard } from './cards/ClimateGroupCard';
+import { SecurityGroupCard } from './cards/SecurityGroupCard';
+import { OverviewViewStrategy } from './views/OverviewViewStrategy';
+import { LightsViewStrategy } from './views/LightsViewStrategy';
+import { CoversViewStrategy } from './views/CoversViewStrategy';
+import { SecurityViewStrategy } from './views/SecurityViewStrategy';
+import { BatteriesViewStrategy } from './views/BatteriesViewStrategy';
+import { ClimateViewStrategy } from './views/ClimateViewStrategy';
+import { RoomViewStrategy } from './views/RoomViewStrategy';
 
-void modulesPromise.then(() => { t('all chunks loaded'); });
+// We just import them so they are bundled. We don't need to do anything with the imports
+// since they register themselves via customElements.define.
+[
+  SummaryCard,
+  LightsGroupCard,
+  CoversGroupCard,
+  BatteriesGroupCard,
+  ClimateGroupCard,
+  SecurityGroupCard,
+  OverviewViewStrategy,
+  LightsViewStrategy,
+  CoversViewStrategy,
+  SecurityViewStrategy,
+  BatteriesViewStrategy,
+  ClimateViewStrategy,
+  RoomViewStrategy,
+];
+
+import { Registry } from './Registry';
+import { getVisibleAreasFromHass } from './utils/name-utils';
+import { localize } from './utils/localize';
+
+import { RequinardDashboardStrategyEditor } from './editor/StrategyEditor';
 
 class RequinardDashboardStrategy extends HTMLElement {
   static async generate(config: RequinardStrategyConfig, hass: HomeAssistant): Promise<LovelaceConfig> {
     generateCallCount++;
     t(`generate() called (#${generateCallCount})`);
 
-    await modulesPromise;
-    t('modules ready');
-
-    const { Registry } = await import('./Registry');
-    const { getVisibleAreasFromHass } = await import('./utils/name-utils');
-    const { localize } = await import('./utils/localize');
     t('imports done');
 
     const getStrategy = (tag: string): any => customElements.get(tag);
@@ -152,8 +165,6 @@ class RequinardDashboardStrategy extends HTMLElement {
   }
 
   static async getConfigElement(): Promise<HTMLElement> {
-    await import('./editor/StrategyEditor');
-    await customElements.whenDefined('requinard-dashboard-strategy-editor');
     return document.createElement('requinard-dashboard-strategy-editor');
   }
 }

@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkrequinard_dashboard_strategy=self.webpackChunkrequinard_dashboard_strategy||[]).push([[217,598],{217(e,a,r){r.d(a,{G:()=>s});const s=["overview","custom_cards","areas","weather","energy"]}}]);

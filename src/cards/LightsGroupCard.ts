@@ -57,7 +57,7 @@ interface LovelaceCardElement extends HTMLElement {
 
 const LIGHT_BRIGHTNESS_MODES = ['brightness', 'color_temp', 'hs', 'xy', 'rgb', 'rgbw', 'rgbww', 'white'];
 
-class RequinardLightsGroupCard extends LitElement {
+export class LightsGroupCard extends LitElement {
   static properties = {
     hass: { attribute: false },
   };
@@ -730,4 +730,4 @@ class RequinardLightsGroupCard extends LitElement {
   }
 }
 
-customElements.define('requinard-lights-group-card', RequinardLightsGroupCard);
+customElements.define('requinard-lights-group-card', LightsGroupCard);

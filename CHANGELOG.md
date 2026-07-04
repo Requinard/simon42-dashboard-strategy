@@ -2,7 +2,30 @@
 All notable changes to this project will be documented in this file.  
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-A list of unreleased changes can be found [here](https://github.com/TheRealSimon42/simon42-dashboard-strategy/compare/v1.3.3...HEAD).
+A list of unreleased changes can be found [here](https://github.com/TheRealSimon42/simon42-dashboard-strategy/compare/v1.4.0...HEAD).
+
+<a name="1.4.0"></a>
+## [1.4.0] - 2026-07-04
+### Rebranding
+- Full project rebrand from **Simon42** to **Requinard** Dashboard Strategy.
+- Updated all custom element tags to `requinard-*`.
+- Updated all strategy identifiers to `ll-strategy-requinard-*`.
+
+### Features
+- **Advanced Grouping**: Added room-level and floor-level grouping for all major views:
+  - Lights, Covers, Security, Batteries, and Climate.
+- **Room Sections**: When room grouping is enabled, lights and devices are organized into distinct room sections with their own headings and batch actions.
+- **Floor Sorting**: Areas are sorted by their floor (following Home Assistant order) and then by name.
+- **New Group Cards**: Introduced reactive group cards for Batteries, Climate, and Security.
+- **Shared Utilities**: Centralized grouping logic into `grouping-utils.ts` for consistency across cards.
+
+### Bugfixes
+- Resolved build errors by ensuring proper localization imports in group cards.
+- Fixed stale card cleanup in reactive group cards during state updates.
+
+### Chores
+- Bump version to 1.4.0.
+- Updated documentation and README with new branding.
 
 <a name="1.3.3"></a>
 ## [1.3.3] - 2026-04-10

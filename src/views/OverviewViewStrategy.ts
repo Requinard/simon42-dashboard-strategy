@@ -60,7 +60,7 @@ function renderCustomCards(cards: CustomCard[]): LovelaceCardConfig[] {
   return result;
 }
 
-class RequinardViewOverviewStrategy extends HTMLElement {
+export class OverviewViewStrategy extends HTMLElement {
   static async generate(config: any, hass: HomeAssistant): Promise<LovelaceViewConfig> {
     timeStart('overview-generate');
     const dashboardConfig: RequinardStrategyConfig = config.dashboardConfig || {};
@@ -153,4 +153,4 @@ class RequinardViewOverviewStrategy extends HTMLElement {
   }
 }
 
-customElements.define('ll-strategy-requinard-view-overview', RequinardViewOverviewStrategy);
+customElements.define('ll-strategy-requinard-view-overview', OverviewViewStrategy);

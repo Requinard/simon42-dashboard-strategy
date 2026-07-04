@@ -18,7 +18,7 @@ interface BatteriesGroupConfig {
   group_by_rooms?: boolean;
 }
 
-class RequinardBatteriesGroupCard extends LitElement {
+export class BatteriesGroupCard extends LitElement {
   static properties = {
     hass: { attribute: false },
   };
@@ -342,4 +342,4 @@ class RequinardBatteriesGroupCard extends LitElement {
   }
 }
 
-customElements.define('requinard-batteries-group-card', RequinardBatteriesGroupCard);
+customElements.define('requinard-batteries-group-card', BatteriesGroupCard);

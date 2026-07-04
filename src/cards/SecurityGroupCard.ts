@@ -22,7 +22,7 @@ interface SecurityGroupConfig {
   };
 }
 
-class RequinardSecurityGroupCard extends LitElement {
+export class SecurityGroupCard extends LitElement {
   static properties = {
     hass: { attribute: false },
   };
@@ -306,4 +306,4 @@ class RequinardSecurityGroupCard extends LitElement {
   }
 }
 
-customElements.define('requinard-security-group-card', RequinardSecurityGroupCard);
+customElements.define('requinard-security-group-card', SecurityGroupCard);

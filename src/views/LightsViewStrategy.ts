@@ -4,7 +4,7 @@
 
 import type { LovelaceViewConfig } from '../types/lovelace';
 
-class RequinardViewLightsStrategy extends HTMLElement {
+export class LightsViewStrategy extends HTMLElement {
   static async generate(config: any, _hass: any): Promise<LovelaceViewConfig> {
     const dashboardConfig = config.dashboardConfig || config.config || {};
     const groupByFloors = dashboardConfig.group_lights_by_floors === true;
@@ -42,4 +42,4 @@ class RequinardViewLightsStrategy extends HTMLElement {
   }
 }
 
-customElements.define('ll-strategy-requinard-view-lights', RequinardViewLightsStrategy);
+customElements.define('ll-strategy-requinard-view-lights', LightsViewStrategy);
