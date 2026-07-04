@@ -55,8 +55,6 @@ import { Registry } from './Registry';
 import { getVisibleAreasFromHass } from './utils/name-utils';
 import { localize } from './utils/localize';
 
-import { RequinardDashboardStrategyEditor } from './editor/StrategyEditor';
-
 class RequinardDashboardStrategy extends HTMLElement {
   static async generate(config: RequinardStrategyConfig, hass: HomeAssistant): Promise<LovelaceConfig> {
     generateCallCount++;
@@ -165,6 +163,7 @@ class RequinardDashboardStrategy extends HTMLElement {
   }
 
   static async getConfigElement(): Promise<HTMLElement> {
+    await import('./editor/StrategyEditor');
     return document.createElement('requinard-dashboard-strategy-editor');
   }
 }
